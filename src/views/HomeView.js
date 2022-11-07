@@ -1,15 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, TextInput } from 'react-native';
-import { getDevice, updateDeviceLimit } from '../services/DeviceService';
+import { Center, Select, FormControl, CheckIcon, WarningOutlineIcon } from 'native-base';
+import { getDevice, getUserDevices, updateDeviceLimit } from '../services/DeviceService';
 
 const HomeView = () => {
-  const deviceID = 'd9b657';
+  const [devices, setDevices] = useState([]);
+  const [deviceID, setDeviceID] = useState('');
   const [limit, setLimit] = useState(0.0);
 
-  const fetchData = async () => {
+  const fetchDevices = async () => {
+    const data = await getUserDevices();
+    if (data) {
+      setDevices(data);
+    }
+  };
+
+  const fetchDeviceInfo = async () => {
     const data = await getDevice(deviceID);
     setLimit(parseFloat(data.priceLimit));
   };
+
 
   const updateLimit = async () => {
     updateDeviceLimit(deviceID, limit).then(
@@ -18,28 +28,63 @@ const HomeView = () => {
   }
 
   useEffect(() => {
-    fetchData();
+    fetchDevices();
   }, []);
 
   useEffect(() => {
-    if (limit) {
+    if (devices && deviceID) {
+      fetchDeviceInfo();
+    }
+  }, [devices, deviceID]);
+
+  useEffect(() => {
+    if (limit && deviceID) {
       updateLimit();
     }
-  }, [limit]);
+  }, [limit, deviceID]);
 
   return (
-    <TextInput
-      style={styles.input}
-      keyboardType='numeric'
-      value={limit.toString()}
-      onChangeText={(text) => setLimit(parseFloat(text))}
-    />
+    <Center style={styles.background}>
+      <FormControl w="3/4" maxW="300" isRequired isInvalid={!deviceID}>
+        <FormControl.Label>Select Device</FormControl.Label>
+        <Select
+          minWidth="200"
+          accessibilityLabel="Select Device"
+          placeholder="Select Device"
+          mt="1"
+          selectedValue={deviceID}
+          onValueChange={(e) => setDeviceID(e)}
+        >
+          {
+            devices?.map((d) => <Select.Item key={d.id} label={d.id} value={d.id} />)
+          }
+        </Select>
+        <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
+          Please make a selection!
+        </FormControl.ErrorMessage>
+      </FormControl>
+      <FormControl maxW="300">
+        <FormControl.Label>Price limit (cent/kWh)</FormControl.Label>
+        <TextInput
+          style={styles.input}
+          keyboardType='numeric'
+          value={limit.toString()}
+          onChangeText={(text) => setLimit(parseFloat(text))}
+          editable={deviceID.length > 0}
+        />
+      </FormControl>
+
+    </Center>
   );
 };
 
 var styles = StyleSheet.create({
+  background: {
+    marginTop: '50%'
+  },
   input: {
     height: 40,
+    width: 100,
     margin: 12,
     borderWidth: 1,
     padding: 10,

@@ -10,7 +10,7 @@ const HomeView = () => {
 
   const fetchDevices = async () => {
     const data = await getUserDevices();
-    if (data) {
+    if (typeof data !== String) {
       setDevices(data);
     }
   };

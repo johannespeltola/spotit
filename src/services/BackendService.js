@@ -41,5 +41,4 @@ export const post = async (path, body) => {
     body: JSON.stringify(body)
   };
   return fetch(`${base_url}/${path}`, requestOptions)
-    .then(response => response.json())
 };

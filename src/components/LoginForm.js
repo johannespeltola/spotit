@@ -20,14 +20,18 @@ export const LoginForm = ({ navigation }) => {
 
   useEffect(() => {
     autoLogin().then(
-      () => navigation.navigate('Home'),
+      (res) => {
+        if (res === 200) {
+          navigation.navigate('Home');
+        }
+      },
       () => { }
     );
   }, []);
 
   const loginAction = () => {
     if (username) {
-      login(username.toLowerCase(), password ).then(
+      login(username.toLowerCase(), password).then(
         async (res) => {
           await AsyncStorage.setItem('accessToken', res).then(
             () => navigation.navigate('Home'),

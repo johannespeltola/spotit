@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, TextInput } from 'react-native';
-import { Center, Select, FormControl, CheckIcon, WarningOutlineIcon } from 'native-base';
+import { StyleSheet } from 'react-native';
+import { Center } from 'native-base';
 import { getDevice, getUserDevices, updateDeviceLimit } from '../services/DeviceService';
+import DeviceSelect from '../components/DeviceSelect';
+import PriceLimit from '../components/PriceLimit';
 
 const HomeView = () => {
   const [devices, setDevices] = useState([]);
@@ -19,7 +21,6 @@ const HomeView = () => {
     const data = await getDevice(deviceID);
     setLimit(parseFloat(data.priceLimit));
   };
-
 
   const updateLimit = async () => {
     updateDeviceLimit(deviceID, limit).then(
@@ -45,35 +46,8 @@ const HomeView = () => {
 
   return (
     <Center style={styles.background}>
-      <FormControl w="3/4" maxW="300" isRequired isInvalid={!deviceID}>
-        <FormControl.Label>Select Device</FormControl.Label>
-        <Select
-          minWidth="200"
-          accessibilityLabel="Select Device"
-          placeholder="Select Device"
-          mt="1"
-          selectedValue={deviceID}
-          onValueChange={(e) => setDeviceID(e)}
-        >
-          {
-            devices?.map((d) => <Select.Item key={d.id} label={d.id} value={d.id} />)
-          }
-        </Select>
-        <FormControl.ErrorMessage leftIcon={<WarningOutlineIcon size="xs" />}>
-          Please make a selection!
-        </FormControl.ErrorMessage>
-      </FormControl>
-      <FormControl maxW="300">
-        <FormControl.Label>Price limit (cent/kWh)</FormControl.Label>
-        <TextInput
-          style={styles.input}
-          keyboardType='numeric'
-          value={limit.toString()}
-          onChangeText={(text) => setLimit(parseFloat(text))}
-          editable={deviceID.length > 0}
-        />
-      </FormControl>
-
+      <DeviceSelect devices={devices} deviceID={deviceID} setDeviceID={setDeviceID} />
+      <PriceLimit limit={limit} setLimit={setLimit} deviceID={deviceID} />
     </Center>
   );
 };
@@ -81,15 +55,7 @@ const HomeView = () => {
 var styles = StyleSheet.create({
   background: {
     marginTop: '50%'
-  },
-  input: {
-    height: 40,
-    width: 100,
-    margin: 12,
-    borderWidth: 1,
-    padding: 10,
-    color: 'black'
-  },
+  }
 });
 
 export default HomeView;
